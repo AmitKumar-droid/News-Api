@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+            crossorigin="anonymous">
+        <title>News Application</title>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">Today's News</a>
+                <button class="navbar-toggler" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse"
+                    id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page"
+                                href="#">News</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Technology</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link">Sports</a>
+                        </li>
+                    </ul>
+                    <form class="d-flex" role="search">
+                        <input id="searchInput" class="form-control me-2"
+                            type="search"
+                            placeholder="Search" aria-label="Search">
+                        <button id="search" class="btn btn-outline-success"
+                            type="submit">Search</button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+        <div class="container">
+            <h3>Welcome to news app(<span id="resultCount"></span> Results)</h3>
+            <div class="row content">
+                <!-- Articles will be loaded here -->
+            </div>
+            <div class="d-flex justify-content-around">
+                <button id="prev" class="btn btn-primary"> < Previous page</button>
+                <button id="next" class="btn btn-primary">Next page > </button>
+            </div>
+        </div>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+            integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+            crossorigin="anonymous"></script>
+
+        <script>
+            let currentQuery = "sports";
+            let currentPage = 1;
+
+            const newsFetch = async (page, query) => {
+                try {
+                    console.log(`fetching news for ${query} and for page ${page}`);
+                    const url = `https://newsapi.org/v2/everything?q=Apple&from=2025-01-12&sortBy=popularity&apiKey=b02331c5a6974b93a9aaeaa7ae186a17`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    if (data.status === "ok") {
+                        displayArticles(data);
+                    } else {
+                        console.error("Error fetching news data");
+                    }
+                } catch (error) {
+                    console.error("Error fetching the news:", error);
+                }
+            };
+
+            const displayArticles = (data) => {
+                let str = "";
+                document.getElementById("resultCount").innerHTML = data.totalResults;
+
+                for (let item of data.articles) {
+                    str += `
+                        <div class="col-3 mx-4 py-3">
+                            <div class="card">
+                                <img src="${item.urlToImage}" class="card-img-top" alt="...">
+                                <div class="card-body">
+                                    <h5 class="card-title">${item.title}</h5>
+                                    <p class="card-text">${item.description}</p>
+                                    <a href="${item.url}" target="_blank" class="btn btn-primary">Go somewhere</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                document.querySelector(".content").innerHTML = str;
+            };
+
+            document.getElementById("search").addEventListener("click", (e) => {
+                e.preventDefault();
+                currentQuery = document.getElementById("searchInput").value;
+                currentPage = 1;
+                newsFetch(currentPage, currentQuery);
+            });
+
+            document.getElementById("prev").addEventListener("click", (e) => {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    newsFetch(currentPage, currentQuery);
+                }
+            });
+
+            document.getElementById("next").addEventListener("click", (e) => {
+                e.preventDefault();
+                currentPage++;
+                newsFetch(currentPage, currentQuery);
+            });
+
+            // Initial load
+            newsFetch(currentPage, currentQuery);
+        </script>
+    </body>
+</html>
